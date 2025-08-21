@@ -1,12 +1,17 @@
-# Isaac Sim 5.0.0 と ROS 2 Humble 統合環境
+# Toyota PH1 プロジェクト - Isaac Sim 5.0.0 と ROS 2 Humble 統合環境
 
-このリポジトリには、Docker コンテナ内で NVIDIA Isaac Sim 5.0.0 と ROS 2 Humble 統合をセットアップするための設定ファイルとスクリプトが含まれています。
+このリポジトリには、Toyota PH1 プロジェクトのフェーズ1用として、Docker コンテナ内で NVIDIA Isaac Sim 5.0.0 と ROS 2 Humble 統合をセットアップするための設定ファイルとスクリプトが含まれています。
 
 ## 環境概要
 
 ### 含まれるコンポーネント
 - **NVIDIA Isaac Sim 5.0.0**: 最新の物理シミュレーション環境
 - **ROS 2 Humble**: ロボット開発フレームワーク
+
+### Toyota PH1 プロジェクト（フェーズ1）
+- **VLM Robot Controller**: ビジョン言語モデルベースのロボット制御システム
+- **Spot Environment**: Boston Dynamics Spot ロボット用シミュレーション環境
+- **Captioned Image Viewer**: 画像キャプション表示ツール
 
 
 ## 前提条件
@@ -39,7 +44,7 @@ sudo systemctl restart docker
 
 ### 1. リポジトリのクローン
 ```bash
-git clone <repository-url> isaac_docker
+git clone https://github.com/Prox-Industries/dev-isaac-env-toyota.git isaac_docker
 cd isaac_docker
 ```
 
@@ -65,6 +70,7 @@ docker images | grep prox_sim
 ```bash
 # .bashrc に環境変数を追加
 export DISPLAY=<ローカルPCのIPアドレス>:0
+# 例： export DISPLAY=192.168.100.21:0
 source ~/.bashrc
 ```
 
@@ -137,41 +143,6 @@ runheadless
 # Omniverse Streaming Client を使用
 ```
 
-### ROS 2 の使用
-
-#### ROS 2 環境の確認
-```bash
-# ROS 2 の環境変数を確認
-echo $ROS_DISTRO
-echo $RMW_IMPLEMENTATION
-
-# ROS 2 のソース
-source /opt/ros/humble/setup.bash
-```
-
-#### 基本的なROS 2 コマンド
-```bash
-# ROS 2 ノードの一覧
-ros2 node list
-
-# トピックの一覧
-ros2 topic list
-
-# サービス一覧
-ros2 service list
-
-# パラメータ一覧
-ros2 param list
-```
-
-#### TurtleBot3 Lime の起動
-```bash
-# TurtleBot3 Lime シミュレーションを起動
-ros2 launch turtlebot3_gazebo turtlebot3_house.launch.py
-
-# 別のターミナルでナビゲーションを起動
-ros2 launch nav2_bringup bringup_launch.py
-```
 
 ## プロジェクト構造
 
@@ -199,131 +170,16 @@ isaac_docker/
     └── requirements.txt        # Python 依存関係
 ```
 
-## トラブルシューティング
-
-### よくある問題と解決方法
-
-#### 1. ディスプレイエラー
-```bash
-# X11サーバーへのアクセスを許可
-xhost +
-
-# ディスプレイ変数を確認
-echo $DISPLAY
-```
-
-#### 2. GPU アクセスエラー
-```bash
-# NVIDIA Container Toolkit の確認
-docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi
-
-# Docker デーモンの再起動
-sudo systemctl restart docker
-```
-
-#### 3. メモリ不足エラー
-```bash
-# Docker のメモリ制限を確認
-docker system df
-
-# 未使用リソースの削除
-docker system prune -a
-```
-
-#### 4. ネットワークエラー
-```bash
-# ネットワーク設定の確認
-docker network ls
-
-# コンテナのネットワーク設定を確認
-docker inspect isaac-sim-ws
-```
-
-### ログの確認
-```bash
-# Isaac Sim のログを確認
-tail -f ./isaac-sim/logs/isaac-sim.log
-
-# Docker コンテナのログを確認
-docker logs isaac-sim-ws
-```
-
-## パフォーマンス最適化
-
-### 環境変数設定
-```bash
-# GUI パフォーマンス設定
-export QT_X11_NO_MITSHM=1
-export QT_GRAPHICSSYSTEM=native
-export QT_QPA_PLATFORM=xcb
-
-# OpenGL パフォーマンス設定
-export LIBGL_ALWAYS_SOFTWARE=0
-export MESA_GL_VERSION_OVERRIDE=4.5
-export __GL_SYNC_TO_VBLANK=0
-export __GL_THREADED_OPTIMIZATIONS=1
-
-# ROS 2 パフォーマンス設定
-export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-export ROS_DOMAIN_ID=31
-```
-
-### システム設定
-```bash
-# GPU メモリの確認
-nvidia-smi
-
-# システムリソースの監視
-htop
-```
-
-## 開発ガイド
-
-### 新しいROS 2 パッケージの追加
-```bash
-# ワークスペースの作成
-mkdir -p ~/ros2_ws/src
-cd ~/ros2_ws/src
-
-# パッケージの作成
-ros2 pkg create --build-type ament_python my_package
-
-# ビルド
-cd ~/ros2_ws
-colcon build
-source install/setup.bash
-```
-
-### Isaac Sim スクリプトの開発
-```python
-# Isaac Sim Python API の使用例
-from omni.isaac.kit import SimulationApp
-
-# シミュレーションアプリの初期化
-simulation_app = SimulationApp({"headless": False})
-
-# シミュレーションの実行
-simulation_app.run()
-```
-
 ## ライセンス
 
 このプロジェクトは MIT ライセンスの下で提供されています。詳細は [LICENSE](LICENSE) ファイルをご覧ください。
 
-## サポート
-
-問題が発生した場合は、以下の手順でサポートを受けてください：
-
-1. [トラブルシューティング](#トラブルシューティング) セクションを確認
-2. ログファイルを確認
-3. GitHub Issues で問題を報告
 
 ## 更新履歴
 
 - **v1.0.0**: Isaac Sim 5.0.0 + ROS 2 Humble 統合環境の初期リリース
-- **v1.1.0**: TurtleBot3 Lime サポートの追加
-- **v1.2.0**: Toyota PH1 プロジェクトの統合
-- **v1.3.0**: バックグラウンドコンテナ実行機能の追加
+- **v1.1.0**: Toyota PH1 プロジェクトの統合
+- **v1.2.0**: バックグラウンドコンテナ実行機能の追加
   - エディタを閉じてもコンテナが継続実行
   - コンテナ管理スクリプトの追加（接続・停止・再起動）
   - 完全初期化機能の実装

@@ -68,10 +68,8 @@ docker images | grep prox_sim
 
 ### 4. 環境変数の設定
 ```bash
-# .bashrc に環境変数を追加
-export DISPLAY=<ローカルPCのIPアドレス>:0
 # 例： export DISPLAY=192.168.100.21:0
-source ~/.bashrc
+export DISPLAY=<ローカルPCのIPアドレス>:0
 ```
 
 ## 使用方法

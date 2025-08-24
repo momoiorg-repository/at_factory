@@ -1,6 +1,6 @@
-# Merged Dockerfile: Isaac Sim 4.5.0 + ROS 2 Humble + TurtleBot3 Lime workspace
+# Isaac@Factory Dockerfile: Isaac Sim 5.0.0 + ROS 2 Humble + Factory Environment
 
-# Base image: Isaac Sim 4.5.0 official container
+# Base image: Isaac Sim 5.0.0 official container
 FROM nvcr.io/nvidia/isaac-sim:5.0.0
 
 # Use bash as default shell
@@ -83,7 +83,7 @@ RUN apt-get update \
        ros-humble-rqt* ros-humble-rviz2 \
        # Additional GUI performance packages
        libgl1-mesa-glx libgl1-mesa-dri mesa-utils \
-       # TurtleBot3 Lime dependencies
+       # Factory environment dependencies
        ros-humble-dynamixel-sdk \
        ros-humble-ros2-control \
        ros-humble-cartographer ros-humble-cartographer-ros \
@@ -126,7 +126,7 @@ RUN echo '<?xml version="1.0" encoding="UTF-8" ?>' > /cyclonedds.xml \
     && echo '  </Domain>' >> /cyclonedds.xml \
     && echo '</CycloneDDS>' >> /cyclonedds.xml
 
-# Install Isaac lab
+# Install Isaac lab for factory environment
 RUN apt-get update \
     && git clone https://github.com/umegan/IsaacLab_lime.git /IsaacLab \
     && cd /IsaacLab \

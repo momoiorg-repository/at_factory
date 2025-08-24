@@ -1,6 +1,6 @@
-# Toyota PH1 プロジェクト - Isaac Sim 5.0.0 と ROS 2 Humble 統合環境
+# Isaac@Factory プロジェクト - Isaac Sim 5.0.0 と ROS 2 Humble 統合環境
 
-このリポジトリには、Toyota PH1 プロジェクトのフェーズ1用として、Docker コンテナ内で NVIDIA Isaac Sim 5.0.0 と ROS 2 Humble 統合をセットアップするための設定ファイルとスクリプトが含まれています。
+このリポジトリには、Isaac@Factory プロジェクト用として、Docker コンテナ内で NVIDIA Isaac Sim 5.0.0 と ROS 2 Humble 統合をセットアップするための設定ファイルとスクリプトが含まれています。
 
 ## 環境概要
 
@@ -8,11 +8,11 @@
 - **NVIDIA Isaac Sim 5.0.0**: 最新の物理シミュレーション環境
 - **ROS 2 Humble**: ロボット開発フレームワーク
 
-### Toyota PH1 プロジェクト（フェーズ1）
-- **VLM Robot Controller**: ビジョン言語モデルベースのロボット制御システム
-- **Spot Environment**: Boston Dynamics Spot ロボット用シミュレーション環境
-- **Captioned Image Viewer**: 画像キャプション表示ツール
-
+### Isaac@Factory プロジェクト
+- **Factory Environment**: 工場環境の3Dモデルとシミュレーション
+- **USD Files**: Universal Scene Description ファイルによる工場シーン
+- **Dual Arm Robot**: デュアルアームロボットのシミュレーション
+- **Factory Assets**: 工場設備と環境のアセット
 
 ## 前提条件
 
@@ -44,29 +44,23 @@ sudo systemctl restart docker
 
 ### 1. リポジトリのクローン
 ```bash
-git clone https://github.com/Prox-Industries/dev-isaac-env-toyota.git isaac_docker
-cd isaac_docker
+git clone https://github.com/momoiorg-repository/-factory.git isaac_factory
+cd isaac_factory
 ```
 
-### 2. 永続ストレージディレクトリの作成
+### 2. 初期化スクリプトの実行
 ```bash
-# Isaac Sim のキャッシュとデータ用ディレクトリを作成
-mkdir -p ./isaac-sim/{cache/kit,cache/ov,cache/pip,cache/glcache,cache/computecache,logs,data,documents,config}
-
-# 権限を設定
-chmod -R 755 ./isaac-sim
+# 自動セットアップスクリプトを実行
+./init.sh
 ```
 
-### 3. Docker イメージのビルド
-```bash
-# Docker イメージをビルド（約30-60分かかります）
-docker build -t prox_sim:5.0.0 .
+このスクリプトは以下を自動実行します：
+- Isaac Sim の永続ストレージディレクトリの作成
+- Docker イメージのビルド（約30-60分）
+- スクリプトの実行権限設定
+- 環境変数の設定ガイド表示
 
-# ビルドの進行状況を確認
-docker images | grep prox_sim
-```
-
-### 4. 環境変数の設定
+### 3. 環境変数の設定
 ```bash
 # 例： export DISPLAY=192.168.100.21:0
 export DISPLAY=<ローカルPCのIPアドレス>:0
@@ -78,9 +72,6 @@ export DISPLAY=<ローカルPCのIPアドレス>:0
 
 #### 1. コンテナの起動（バックグラウンド実行）
 ```bash
-# 実行権限を付与
-chmod +x run_isaac_sim_docker.sh connect_to_container.sh stop_container.sh restart_container.sh
-
 # コンテナをバックグラウンドで起動（エディタを閉じても継続）
 ./run_isaac_sim_docker.sh
 ```
@@ -120,8 +111,8 @@ docker run --name isaac-sim-ws -it --rm \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
   -v $HOME/.Xauthority:/root/.Xauthority:ro \
   -v ./isaac-sim:/root/isaac-sim:rw \
-  -v ./dev-toyota-ph1:/IsaacLab/scripts/dev-toyota-ph1:rw \
-  prox_sim:5.0.0
+  -v ./factory_v1:/IsaacLab/scripts/factory_v1:rw \
+  isaac_factory:5.0.0
 ```
 
 ### Isaac Sim の起動
@@ -141,13 +132,13 @@ runheadless
 # Omniverse Streaming Client を使用
 ```
 
-
 ## プロジェクト構造
 
 ```
-isaac_docker/
+isaac_factory/
 ├── README.md                    # このファイル
 ├── Dockerfile                   # Isaac Sim + ROS 2 イメージ定義
+├── init.sh                      # 自動初期化スクリプト
 ├── run_isaac_sim_docker.sh     # コンテナ起動スクリプト（バックグラウンド）
 ├── connect_to_container.sh      # コンテナ接続スクリプト
 ├── stop_container.sh           # コンテナ停止・削除スクリプト
@@ -160,24 +151,49 @@ isaac_docker/
 │   ├── data/                    # シミュレーションデータ
 │   ├── documents/               # ドキュメント
 │   └── config/                  # 設定ファイル
-└── dev-toyota-ph1/             # Toyota PH1 プロジェクト
-    ├── README.md               # プロジェクト説明
-    ├── vlm_robot_controller.py # VLM ロボット制御
-    ├── spot_env.py            # Spot 環境
-    ├── captioned_image_viewer.py # 画像表示ツール
-    └── requirements.txt        # Python 依存関係
+└── factory_v1/                  # Isaac@Factory プロジェクト
+    ├── Custom_Dual_arm.usd     # デュアルアームロボット
+    ├── factory_base.usd        # 工場ベース環境
+    ├── factory_v1base.usd      # 工場v1ベース
+    ├── factory_v1area.usd      # 工場エリア1
+    ├── factory_v1area2.usd     # 工場エリア2
+    ├── factory_v1Tores.usd     # 工場トレス
+    ├── ridgeback_franka-roscon.usd # Ridgeback + Franka ロボット
+    ├── quicktrun.usdc          # クイックターン
+    ├── bad_area.usdc           # 不良エリア
+    ├── bad_area-mesh.usd       # 不良エリアメッシュ
+    ├── Materials/              # マテリアルファイル
+    └── .thumbs/                # サムネイルファイル
 ```
+
+## Factory Environment の特徴
+
+### USD ファイルの説明
+- **Custom_Dual_arm.usd**: カスタムデュアルアームロボットの完全なモデル
+- **factory_base.usd**: 工場の基本環境とレイアウト
+- **factory_v1base.usd**: 工場v1の基本構造
+- **factory_v1area.usd**: 工場エリア1の詳細環境
+- **factory_v1area2.usd**: 工場エリア2の詳細環境
+- **ridgeback_franka-roscon.usd**: Ridgeback移動ロボットとFrankaアームの統合
+
+### シミュレーション機能
+- **物理シミュレーション**: リアルタイム物理演算
+- **ロボット制御**: ROS 2 ベースのロボット制御
+- **環境インタラクション**: 工場環境との相互作用
+- **マルチロボット**: 複数ロボットの同時シミュレーション
 
 ## ライセンス
 
 このプロジェクトは MIT ライセンスの下で提供されています。詳細は [LICENSE](LICENSE) ファイルをご覧ください。
 
-
 ## 更新履歴
 
 - **v1.0.0**: Isaac Sim 5.0.0 + ROS 2 Humble 統合環境の初期リリース
-- **v1.1.0**: Toyota PH1 プロジェクトの統合
+- **v1.1.0**: Isaac@Factory プロジェクトの統合
 - **v1.2.0**: バックグラウンドコンテナ実行機能の追加
   - エディタを閉じてもコンテナが継続実行
   - コンテナ管理スクリプトの追加（接続・停止・再起動）
   - 完全初期化機能の実装
+- **v2.0.0**: Isaac@Factory 環境への移行
+  - Factory USD ファイルの統合
+  - 自動初期化スクリプトの追加

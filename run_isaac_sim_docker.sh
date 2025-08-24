@@ -85,10 +85,8 @@ docker run --name ${CONTAINER_NAME} -d \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
   -v $HOME/.Xauthority:/root/.Xauthority:ro \
   -v ~/Documents:/root/Documents:rw \
-  -v ./dev-toyota-ph1:/IsaacLab/scripts/dev-toyota-ph1:rw \
-  -v /data1/isaac-sim/isaacsim_assets:/root/isaacsim_assets:rw \
-  -v $(pwd)/isaac-sim/config/isaacsim.exp.base.kit:/IsaacLab/_isaac_sim/apps/isaacsim.exp.base.kit:rw \
-  prox_sim:5.0.0 \
+  -v ./factory_v1:/IsaacLab/scripts/factory_v1:rw \
+  isaac_factory:5.0.0 \
   tail -f /dev/null
 
 # コンテナの起動を確認

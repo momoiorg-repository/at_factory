@@ -44,7 +44,7 @@ sudo systemctl restart docker
 
 ### 1. リポジトリのクローン
 ```bash
-git clone https://github.com/momoiorg-repository/-factory.git isaac_factory
+git clone <repository-url> isaac_factory
 cd isaac_factory
 ```
 

@@ -1,3 +1,7 @@
+# データファイル
+factory_v1/
+Collected_factory_base/
+
 # Isaac Sim キャッシュとログファイル
 isaac-sim/cache/
 isaac-sim/logs/

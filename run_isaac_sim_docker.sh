@@ -46,7 +46,11 @@ if docker ps -a --format "table {{.Names}}" | grep -q "^${CONTAINER_NAME}$"; the
         exit 0
     fi
 fi
-
+#   --device=/dev/nvidia0:/dev/nvidia0 \
+#   --device=/dev/nvidiactl:/dev/nvidiactl \
+#   --device=/dev/nvidia-uvm:/dev/nvidia-uvm \
+#   --device=/dev/nvidia-modeset:/dev/nvidia-modeset \
+#   --device=/dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools \
 echo "Isaac Sim コンテナをバックグラウンドで開始しています..."
 
 # バックグラウンドでコンテナを実行（-d オプションでデタッチモード）
@@ -69,11 +73,6 @@ docker run --name ${CONTAINER_NAME} -d \
   -e __GL_THREADED_OPTIMIZATIONS=1 \
   -e RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
   -e ROS_DOMAIN_ID=31 \
-  --device=/dev/nvidia0:/dev/nvidia0 \
-  --device=/dev/nvidiactl:/dev/nvidiactl \
-  --device=/dev/nvidia-uvm:/dev/nvidia-uvm \
-  --device=/dev/nvidia-modeset:/dev/nvidia-modeset \
-  --device=/dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools \
   -v ./isaac-sim/cache/kit:/isaac-sim/kit/cache:rw \
   -v ./isaac-sim/cache/ov:/root/.cache/ov:rw \
   -v ./isaac-sim/cache/pip:/root/.cache/pip:rw \
@@ -85,9 +84,10 @@ docker run --name ${CONTAINER_NAME} -d \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
   -v $HOME/.Xauthority:/root/.Xauthority:ro \
   -v ~/Documents:/root/Documents:rw \
-  -v ./factory_v1:/IsaacLab/scripts/factory_v1:rw \
+  -v ./Collected_factory_base:/root/Collected_factory_base:rw \
+  --entrypoint /bin/bash \
   isaac_factory:5.0.0 \
-  tail -f /dev/null
+  -c "tail -f /dev/null"
 
 # コンテナの起動を確認
 if [ $? -eq 0 ]; then

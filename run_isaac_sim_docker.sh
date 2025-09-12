@@ -85,6 +85,7 @@ docker run --name ${CONTAINER_NAME} -d \
   -v $HOME/.Xauthority:/root/.Xauthority:ro \
   -v ~/Documents:/root/Documents:rw \
   -v ./plugin/robot:/robot:rw \
+  -v ./plugin/world:/world:rw \
   --entrypoint /bin/bash \
   isaac_factory:5.0.0 \
   -c "tail -f /dev/null"

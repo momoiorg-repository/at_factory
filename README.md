@@ -173,21 +173,6 @@ isaac_factory/
 
 ```
 
-## Factory Environment の特徴
-
-### USD ファイルの説明
-- **Custom_Dual_arm.usd**: カスタムデュアルアームロボットの完全なモデル
-- **factory_base.usd**: 工場の基本環境とレイアウト
-- **factory_v1base.usd**: 工場v1の基本構造
-- **factory_v1area.usd**: 工場エリア1の詳細環境
-- **factory_v1area2.usd**: 工場エリア2の詳細環境
-- **ridgeback_franka-roscon.usd**: Ridgeback移動ロボットとFrankaアームの統合
-
-### シミュレーション機能
-- **物理シミュレーション**: リアルタイム物理演算
-- **ロボット制御**: ROS 2 ベースのロボット制御
-- **環境インタラクション**: 工場環境との相互作用
-- **マルチロボット**: 複数ロボットの同時シミュレーション
 
 ## ライセンス
 

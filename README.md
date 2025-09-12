@@ -61,6 +61,29 @@ export DISPLAY=<ローカルPCのIPアドレス>:0
 
 ## 使用方法
 
+### プラグイン・ロボットのインストール
+
+#### finstall.sh スクリプト
+GitHubリポジトリからプラグインやロボットを自動インストールするためのスクリプトです。
+
+```bash
+# 使用方法
+./finstall.sh <github_repo_url>
+
+# 例: melon_ros2 リポジトリのインストール
+./finstall.sh https://github.com/SSatoya/melon_ros2.git
+```
+
+**機能:**
+1. `plugin/robot/` ディレクトリの自動作成
+2. 指定されたGitHubリポジトリのクローン
+3. リポジトリ内の `install.sh` スクリプトの自動実行
+
+**注意事項:**
+- インストールされたロボット・プラグインは Docker コンテナ内の `/robot` にマウントされます
+- 既存のディレクトリがある場合は自動的に削除されます
+- `install.sh` が見つからない場合は警告メッセージが表示されます
+
 ### コンテナの管理
 
 #### 1. コンテナの起動（バックグラウンド実行）
@@ -132,6 +155,7 @@ isaac_factory/
 ├── README.md                    # このファイル
 ├── Dockerfile                   # Isaac Sim + ROS 2 イメージ定義
 ├── init.sh                      # 自動初期化スクリプト
+├── finstall.sh                  # プラグイン・ロボット自動インストールスクリプト
 ├── run_isaac_sim_docker.sh     # コンテナ起動スクリプト（バックグラウンド）
 ├── connect_to_container.sh      # コンテナ接続スクリプト
 ├── stop_container.sh           # コンテナ停止・削除スクリプト
@@ -144,19 +168,9 @@ isaac_factory/
 │   ├── data/                    # シミュレーションデータ
 │   ├── documents/               # ドキュメント
 │   └── config/                  # 設定ファイル
-└── factory_v1/                  # Isaac@Factory プロジェクト
-    ├── Custom_Dual_arm.usd     # デュアルアームロボット
-    ├── factory_base.usd        # 工場ベース環境
-    ├── factory_v1base.usd      # 工場v1ベース
-    ├── factory_v1area.usd      # 工場エリア1
-    ├── factory_v1area2.usd     # 工場エリア2
-    ├── factory_v1Tores.usd     # 工場トレス
-    ├── ridgeback_franka-roscon.usd # Ridgeback + Franka ロボット
-    ├── quicktrun.usdc          # クイックターン
-    ├── bad_area.usdc           # 不良エリア
-    ├── bad_area-mesh.usd       # 不良エリアメッシュ
-    ├── Materials/              # マテリアルファイル
-    └── .thumbs/                # サムネイルファイル
+├── plugin/                      # プラグイン・ロボットディレクトリ
+│   └── robot/                   # ロボットプラグイン（コンテナ内 /robot にマウント）
+
 ```
 
 ## Factory Environment の特徴
@@ -190,3 +204,7 @@ isaac_factory/
 - **v2.0.0**: Isaac@Factory 環境への移行
   - Factory USD ファイルの統合
   - 自動初期化スクリプトの追加
+- **v2.1.0**: プラグイン・ロボット自動インストール機能の追加
+  - finstall.sh スクリプトの実装
+  - GitHub リポジトリからの自動インストール機能
+  - コンテナ内 /robot マウントポイントの設定

@@ -1,6 +1,6 @@
 # データファイル
-factory_v1/
-Collected_factory_base/
+plugin/robot/*
+plugin/world/*
 
 # Isaac Sim キャッシュとログファイル
 isaac-sim/cache/

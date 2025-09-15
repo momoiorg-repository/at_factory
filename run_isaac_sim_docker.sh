@@ -46,16 +46,12 @@ if docker ps -a --format "table {{.Names}}" | grep -q "^${CONTAINER_NAME}$"; the
         exit 0
     fi
 fi
-#   --device=/dev/nvidia0:/dev/nvidia0 \
-#   --device=/dev/nvidiactl:/dev/nvidiactl \
-#   --device=/dev/nvidia-uvm:/dev/nvidia-uvm \
-#   --device=/dev/nvidia-modeset:/dev/nvidia-modeset \
-#   --device=/dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools \
 echo "Isaac Sim コンテナをバックグラウンドで開始しています..."
 
 # バックグラウンドでコンテナを実行（-d オプションでデタッチモード）
 docker run --name ${CONTAINER_NAME} -d \
-  --runtime=nvidia --gpus all \
+  --runtime=nvidia \
+  --gpus all \
   -e "ACCEPT_EULA=Y" \
   -e "PRIVACY_CONSENT=Y" \
   --network host \
@@ -87,7 +83,7 @@ docker run --name ${CONTAINER_NAME} -d \
   -v ./plugin/robot:/robot:rw \
   -v ./plugin/world:/world:rw \
   --entrypoint /bin/bash \
-  isaac_factory:5.0.0 \
+  isaac_factory:latest \
   -c "tail -f /dev/null"
 
 # コンテナの起動を確認

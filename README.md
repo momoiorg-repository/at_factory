@@ -37,8 +37,8 @@ https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install
 
 ### 1. リポジトリのクローン
 ```bash
-git clone <repository-url> isaac_factory
-cd isaac_factory
+git clone <repository-url> 
+cd isaacsim-common
 ```
 
 ### 2. 初期化スクリプトの実行

@@ -270,7 +270,7 @@ RUN echo 'export RMW_IMPLEMENTATION=rmw_fastrtps_cpp' >> ~/.bashrc \
     && echo 'export MESA_GLSL_VERSION_OVERRIDE=450' >> ~/.bashrc \
     && echo 'export __GL_SYNC_TO_VBLANK=0' >> ~/.bashrc \
     && echo 'export __GL_THREADED_OPTIMIZATIONS=1' >> ~/.bashrc \
-    && echo 'export CYCLONEDDS_URI=file:///cyclonedds.xml' >> ~/.bashrc
+    && echo 'export FASTDDS_URI=file:///fastdds.xml' >> ~/.bashrc
 
 # Create runtime directory
 RUN mkdir -p /tmp/runtime-root && chmod 700 /tmp/runtime-root

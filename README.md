@@ -31,7 +31,7 @@ https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install
 
 ### 1. Clone the Repository
 ```bash
-git clone <repository-url> 
+git clone https://github.com/momoiorg-repository/at_factory.git
 cd at_factory
 ```
 

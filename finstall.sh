@@ -33,7 +33,23 @@ echo "Repository URL: $GITHUB_URL"
 # Step 1: Create plugin/robot directory
 echo "Step 1: Creating plugin/robot directory..."
 mkdir -p plugin/robot
-cd plugin/robot
+
+# Check if we have write permissions to plugin/robot
+if [ ! -w "plugin/robot" ]; then
+    echo "No write permission to plugin/robot directory. Attempting to fix permissions..."
+    sudo chown -R $(whoami):$(whoami) plugin/robot 2>/dev/null || {
+        echo "Could not change ownership. Creating temporary directory instead..."
+        mkdir -p temp_install
+        cd temp_install
+    }
+else
+    cd plugin/robot
+fi
+
+# If we're not in temp_install, we should be in plugin/robot now
+if [ "$(basename $(pwd))" != "temp_install" ]; then
+    cd plugin/robot
+fi
 
 # Step 2: Clone the repository
 echo "Step 2: Cloning repository..."
@@ -63,3 +79,15 @@ else
 fi
 
 echo "Process completed. Repository is available at: $(pwd)"
+
+# If we used temp_install, provide instructions for moving the files
+if [ "$(basename $(pwd))" = "temp_install" ]; then
+    echo ""
+    echo "Note: Repository was installed in temp_install/ due to permission issues."
+    echo "To move it to the proper location, run:"
+    echo "  sudo mv temp_install/$REPO_NAME plugin/robot/"
+    echo "  sudo chown -R root:root plugin/robot/$REPO_NAME"
+    echo "  rm -rf temp_install"
+    echo ""
+    echo "The repository is currently available at: $(pwd)/$REPO_NAME"
+fi

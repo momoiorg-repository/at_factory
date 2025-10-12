@@ -71,7 +71,7 @@ A script for automatically installing plugins, robots, and worlds from GitHub re
 ./finstall.sh https://github.com/momoiorg-repository/melon_ros2.git robot
 
 # Install world plugin
-./finstall.sh https://github.com/username/world-environment.git world
+./finstall.sh https://github.com/momoiorg-repository/factory_world1.git world
 ```
 
 **Features:**

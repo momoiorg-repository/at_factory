@@ -33,6 +33,7 @@ https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install
 ```bash
 git clone https://github.com/momoiorg-repository/at_factory.git
 cd at_factory
+git clone https://github.com/isaac-sim/IsaacSim-ros_workspaces.git
 ```
 
 ### 2. Run Initialization Script

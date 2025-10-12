@@ -71,7 +71,7 @@ GitHubリポジトリからプラグインやロボットを自動インスト�
 ./finstall.sh <github_repo_url>
 
 # 例: melon_ros2 リポジトリのインストール
-./finstall.sh https://github.com/SSatoya/melon_ros2.git
+./finstall.sh https://github.com/momoiorg-repository/melon_ros2.git
 ```
 
 **機能:**

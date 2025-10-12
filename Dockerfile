@@ -195,6 +195,11 @@ RUN cd /opt/ros2_humble_ws \
        "-DPYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.11.so" \
        --merge-install
 
+# Fix netifaces module availability for ROS2 CLI tools
+RUN export COLCON_TRACE=0 && export COLCON_PYTHON_EXECUTABLE=/usr/bin/python3.11 \
+    && source /opt/ros2_humble_ws/install/setup.bash \
+    && python3.11 -m pip install netifaces --force-reinstall
+
 # Fix library compatibility issues
 RUN cp /usr/lib/x86_64-linux-gnu/libtinyxml2.so* /opt/ros2_humble_ws/install/lib/ || true \
     && cp /usr/lib/x86_64-linux-gnu/libssl.so* /opt/ros2_humble_ws/install/lib/ || true \
@@ -255,6 +260,8 @@ RUN python3 -m pip install --upgrade pip \
 # Environment setup for runtime with performance optimizations
 RUN echo 'export RMW_IMPLEMENTATION=rmw_fastrtps_cpp' >> ~/.bashrc \
     && echo 'export ROS_DOMAIN_ID=31' >> ~/.bashrc \
+    && echo 'export COLCON_TRACE=0' >> ~/.bashrc \
+    && echo 'export COLCON_PYTHON_EXECUTABLE=/usr/bin/python3.11' >> ~/.bashrc \
     && echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc \
     && echo 'source /opt/ros2_humble_ws/install/setup.bash' >> ~/.bashrc \
     && echo 'source /opt/isaac_sim_ros_ws/install/setup.bash' >> ~/.bashrc \

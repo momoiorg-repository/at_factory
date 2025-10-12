@@ -1,123 +1,117 @@
-# Isaac@Factory プロジェクト - Isaac Sim 5.0.0 と ROS 2 Humble 統合環境
+# @Factory Project - Isaac Sim 5.0.0 and ROS 2 Humble Integration Environment
 
-このリポジトリには、Isaac@Factory プロジェクト用として、Docker コンテナ内で NVIDIA Isaac Sim 5.0.0 と ROS 2 Humble 統合をセットアップするための設定ファイルとスクリプトが含まれています。
+This repository contains configuration files and scripts for setting up NVIDIA Isaac Sim 5.0.0 and ROS 2 Humble integration within a Docker container for the @Factory project.
 
-## 環境概要
+## Environment Overview
 
-### 含まれるコンポーネント
-- **NVIDIA Isaac Sim 5.0.0**: 最新の物理シミュレーション環境
-- **ROS 2 Humble**: ロボット開発フレームワーク
+### Included Components
+- **NVIDIA Isaac Sim 5.0.0**: Latest physics simulation environment
+- **ROS 2 Humble**: Robot development framework
 
-### Isaac@Factory プロジェクト
-- **Factory Environment**: 工場環境の3Dモデルとシミュレーション
-- **USD Files**: Universal Scene Description ファイルによる工場シーン
-- **Dual Arm Robot**: デュアルアームロボットのシミュレーション
-- **Factory Assets**: 工場設備と環境のアセット
 
-## 前提条件
+## Prerequisites
 
-### ハードウェア要件
-- **GPU**: NVIDIA GPU（RTX 3060以上推奨）
-- **メモリ**: 最低16GB RAM（32GB推奨）
-- **ストレージ**: 最低50GBの空き容量
-- **ディスプレイ**: X11対応ディスプレイ
+### Hardware Requirements
+- **GPU**: NVIDIA GPU (RTX 3060 or higher recommended)
+- **Memory**: Minimum 16GB RAM (32GB recommended)
+- **Storage**: Minimum 50GB free space
+- **Display**: X11-compatible display
 
-### ソフトウェア要件
+### Software Requirements
 - **OS**: Ubuntu 22.04 LTS
-- **Docker**: 最新版
-- **NVIDIA Container Toolkit**: インストール済み
-- **NVIDIA Driver**: 最新版（470以上）
+- **Docker**: Latest version
+- **NVIDIA Container Toolkit**: Installed
+- **NVIDIA Driver**: Latest version (470 or higher)
 
-### NVIDIA Container Toolkit のインストール
+### NVIDIA Container Toolkit Installation
 
 https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
 
+## Setup Instructions
 
-## セットアップ手順
-
-### 1. リポジトリのクローン
+### 1. Clone the Repository
 ```bash
 git clone <repository-url> 
-cd isaacsim-common
+cd at_factory
 ```
 
-### 2. 初期化スクリプトの実行
+### 2. Run Initialization Script
 ```bash
-# 自動セットアップスクリプトを実行
+# Execute automated setup script
 ./init.sh
 ```
 
-このスクリプトは以下を自動実行します：
-- Isaac Sim の永続ストレージディレクトリの作成
-- Docker イメージのビルド（約30-60分）
-- スクリプトの実行権限設定
-- 環境変数の設定ガイド表示
+This script automatically performs the following:
+- Creates Isaac Sim persistent storage directories
+- Builds Docker image (approximately 30-60 minutes)
+- Sets script execution permissions
+- Displays environment variable setup guide
 
-### 3. 環境変数の設定
+### 3. Configure Environment Variables
 ```bash
-# 例： export DISPLAY=192.168.100.21:0
-export DISPLAY=<ローカルPCのIPアドレス>:0
+# Example: export DISPLAY=192.168.100.21:0
+export DISPLAY=<your-local-pc-ip-address>:0
 ```
 
-## 使用方法
+## Usage
 
-### プラグイン・ロボットのインストール
+### Plugin and Robot Installation
 
-#### finstall.sh スクリプト
-GitHubリポジトリからプラグインやロボットを自動インストールするためのスクリプトです。
+#### finstall.sh Script
+A script for automatically installing plugins and robots from GitHub repositories.
 
 ```bash
-# 使用方法
+# Usage
 ./finstall.sh <github_repo_url>
 
-# 例: melon_ros2 リポジトリのインストール
+# Example: Install melon_ros2 repository
 ./finstall.sh https://github.com/momoiorg-repository/melon_ros2.git
 ```
 
-**機能:**
-1. `plugin/robot/` ディレクトリの自動作成
-2. 指定されたGitHubリポジトリのクローン
-3. リポジトリ内の `install.sh` スクリプトの自動実行
+**Features:**
+1. Automatic creation of `plugin/robot/` directory
+2. Clones the specified GitHub repository
+3. Automatically executes the `install.sh` script within the repository
 
-**注意事項:**
-- インストールされたロボット・プラグインは Docker コンテナ内の `/robot` にマウントされます
-- 既存のディレクトリがある場合は自動的に削除されます
-- `install.sh` が見つからない場合は警告メッセージが表示されます
+**Notes:**
+- Installed robots/plugins are mounted to `/robot` inside the Docker container
+- Existing directories are automatically removed
+- A warning message is displayed if `install.sh` is not found
 
-### コンテナの管理
+### Container Management
 
-#### 1. コンテナの起動（バックグラウンド実行）
+#### 1. Start Container (Background Execution)
 ```bash
-# コンテナをバックグラウンドで起動（エディタを閉じても継続）
+# Start container in background (continues even after closing editor)
 ./run_isaac_sim_docker.sh
 ```
 
-#### 2. コンテナに接続
+#### 2. Connect to Container
 ```bash
-# 実行中のコンテナに接続
+# Connect to running container
 ./connect_to_container.sh
 
-# コンテナ内で 'exit' を入力してもコンテナは停止しません
+# The container will not stop when you type 'exit' inside the container
 ```
 
-#### 3. コンテナの管理
+#### 3. Container Management
 ```bash
-# コンテナを再起動（削除しない）
+# Restart container (does not delete)
 ./restart_container.sh
 
-# コンテナを停止して完全初期化（削除）
+# Stop and fully initialize container (delete)
 ./stop_container.sh
 
-# コンテナの状態確認
+# Check container status
 docker ps
 ```
 
-#### 4. 手動でDockerコマンド実行（従来方式）
+#### 4. Manual Docker Command Execution (Traditional Method)
 ```bash
-# X11サーバーへのアクセスを許可
+# Allow access to X11 server
 xhost +
 
-# コンテナを起動（エディタを閉じると停止）
+# Start container (stops when editor is closed)
 docker run --name isaac-sim-ws -it --rm \
   --runtime=nvidia --gpus all \
   -e "ACCEPT_EULA=Y" \
@@ -131,65 +125,47 @@ docker run --name isaac-sim-ws -it --rm \
   isaac_factory:5.0.0
 ```
 
-### Isaac Sim の起動
+### Launching Isaac Sim
 
-#### GUI モード（ローカルディスプレイ）
+#### GUI Mode (Local Display)
 ```bash
-# コンテナ内で実行
+# Execute inside container
 runapp
 ```
 
-#### ヘッドレスモード（リモート接続）
+#### Headless Mode (Remote Connection)
 ```bash
-# ヘッドレスサーバーを起動
+# Start headless server
 runheadless
 
-# 別のターミナルでクライアント接続
-# Omniverse Streaming Client を使用
+# Connect client in another terminal
+# Use Omniverse Streaming Client
 ```
 
-## プロジェクト構造
+## Project Structure
 
 ```
 isaac_factory/
-├── README.md                    # このファイル
-├── Dockerfile                   # Isaac Sim + ROS 2 イメージ定義
-├── init.sh                      # 自動初期化スクリプト
-├── finstall.sh                  # プラグイン・ロボット自動インストールスクリプト
-├── run_isaac_sim_docker.sh     # コンテナ起動スクリプト（バックグラウンド）
-├── connect_to_container.sh      # コンテナ接続スクリプト
-├── stop_container.sh           # コンテナ停止・削除スクリプト
-├── restart_container.sh        # コンテナ再起動スクリプト
-├── LICENSE                      # MIT ライセンス
-├── .gitignore                   # Git 除外設定
-├── isaac-sim/                   # Isaac Sim 永続データ
-│   ├── cache/                   # キャッシュファイル
-│   ├── logs/                    # ログファイル
-│   ├── data/                    # シミュレーションデータ
-│   ├── documents/               # ドキュメント
-│   └── config/                  # 設定ファイル
-├── plugin/                      # プラグイン・ロボットディレクトリ
-│   └── robot/                   # ロボットプラグイン（コンテナ内 /robot にマウント）
-
+├── README.md                    # This file
+├── Dockerfile                   # Isaac Sim + ROS 2 image definition
+├── init.sh                      # Automated initialization script
+├── finstall.sh                  # Plugin/robot automated installation script
+├── run_isaac_sim_docker.sh     # Container startup script (background)
+├── connect_to_container.sh      # Container connection script
+├── stop_container.sh           # Container stop/delete script
+├── restart_container.sh        # Container restart script
+├── LICENSE                      # MIT License
+├── .gitignore                   # Git exclusion settings
+├── isaac-sim/                   # Isaac Sim persistent data
+│   ├── cache/                   # Cache files
+│   ├── logs/                    # Log files
+│   ├── data/                    # Simulation data
+│   ├── documents/               # Documents
+│   └── config/                  # Configuration files
+├── plugin/                      # Plugin/robot directory
+│   └── robot/                   # Robot plugins (mounted to /robot in container)
 ```
 
+## License
 
-## ライセンス
-
-このプロジェクトは MIT ライセンスの下で提供されています。詳細は [LICENSE](LICENSE) ファイルをご覧ください。
-
-## 更新履歴
-
-- **v1.0.0**: Isaac Sim 5.0.0 + ROS 2 Humble 統合環境の初期リリース
-- **v1.1.0**: Isaac@Factory プロジェクトの統合
-- **v1.2.0**: バックグラウンドコンテナ実行機能の追加
-  - エディタを閉じてもコンテナが継続実行
-  - コンテナ管理スクリプトの追加（接続・停止・再起動）
-  - 完全初期化機能の実装
-- **v2.0.0**: Isaac@Factory 環境への移行
-  - Factory USD ファイルの統合
-  - 自動初期化スクリプトの追加
-- **v2.1.0**: プラグイン・ロボット自動インストール機能の追加
-  - finstall.sh スクリプトの実装
-  - GitHub リポジトリからの自動インストール機能
-  - コンテナ内 /robot マウントポイントの設定
+This project is provided under the MIT License. See the [LICENSE](LICENSE) file for details.

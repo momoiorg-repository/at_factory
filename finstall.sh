@@ -1,13 +1,15 @@
 #!/bin/bash
 
-# finstall.sh - Automated plugin/robot installation script
-# Usage: ./finstall.sh <github_repo_url>
+# finstall.sh - Automated plugin/robot/world installation script
+# Usage: ./finstall.sh <github_repo_url> [robot|world]
 
 set -e  # Exit on any error
 
 # Function to display usage
 usage() {
-    echo "Usage: $0 <github_repo_url>"
+    echo "Usage: $0 <github_repo_url> [robot|world]"
+    echo "  robot: Install in plugin/robot directory (default)"
+    echo "  world: Install in plugin/world directory"
     exit 1
 }
 
@@ -18,6 +20,13 @@ if [ $# -eq 0 ]; then
 fi
 
 GITHUB_URL="$1"
+INSTALL_TYPE="${2:-robot}"  # Default to 'robot' if not specified
+
+# Validate install type
+if [[ "$INSTALL_TYPE" != "robot" && "$INSTALL_TYPE" != "world" ]]; then
+    echo "Error: Invalid install type. Must be 'robot' or 'world'"
+    usage
+fi
 
 # Validate URL format
 if [[ ! "$GITHUB_URL" =~ ^https://github\.com/.*\.git$ ]]; then
@@ -27,26 +36,23 @@ fi
 
 echo "Starting installation process..."
 echo "Repository URL: $GITHUB_URL"
+echo "Install type: $INSTALL_TYPE"
 
-# Step 1: Create plugin/robot directory
-echo "Step 1: Creating plugin/robot directory..."
-mkdir -p plugin/robot
+# Step 1: Create plugin directory based on install type
+TARGET_DIR="plugin/$INSTALL_TYPE"
+echo "Step 1: Creating $TARGET_DIR directory..."
+mkdir -p "$TARGET_DIR"
 
-# Check if we have write permissions to plugin/robot
-if [ ! -w "plugin/robot" ]; then
-    echo "No write permission to plugin/robot directory. Attempting to fix permissions..."
-    sudo chown -R $(whoami):$(whoami) plugin/robot 2>/dev/null || {
+# Check if we have write permissions to target directory
+if [ ! -w "$TARGET_DIR" ]; then
+    echo "No write permission to $TARGET_DIR directory. Attempting to fix permissions..."
+    sudo chown -R $(whoami):$(whoami) "$TARGET_DIR" 2>/dev/null || {
         echo "Could not change ownership. Creating temporary directory instead..."
         mkdir -p temp_install
         cd temp_install
     }
 else
-    cd plugin/robot
-fi
-
-# If we're not in temp_install, we should be in plugin/robot now
-if [ "$(basename $(pwd))" != "temp_install" ]; then
-    cd plugin/robot
+    cd "$TARGET_DIR"
 fi
 
 # Step 2: Clone the repository
@@ -83,8 +89,8 @@ if [ "$(basename $(pwd))" = "temp_install" ]; then
     echo ""
     echo "Note: Repository was installed in temp_install/ due to permission issues."
     echo "To move it to the proper location, run:"
-    echo "  sudo mv temp_install/$REPO_NAME plugin/robot/"
-    echo "  sudo chown -R root:root plugin/robot/$REPO_NAME"
+    echo "  sudo mv temp_install/$REPO_NAME $TARGET_DIR/"
+    echo "  sudo chown -R root:root $TARGET_DIR/$REPO_NAME"
     echo "  rm -rf temp_install"
     echo ""
     echo "The repository is currently available at: $(pwd)/$REPO_NAME"

@@ -59,25 +59,36 @@ export DISPLAY=<your-local-pc-ip-address>:0
 ### Plugin and Robot Installation
 
 #### finstall.sh Script
-A script for automatically installing plugins and robots from GitHub repositories.
+A script for automatically installing plugins, robots, and worlds from GitHub repositories.
 
 ```bash
 # Usage
-./finstall.sh <github_repo_url>
+./finstall.sh <github_repo_url> [robot|world]
 
-# Example: Install melon_ros2 repository
+# Examples:
+# Install robot plugin (default behavior)
 ./finstall.sh https://github.com/momoiorg-repository/melon_ros2.git
+./finstall.sh https://github.com/momoiorg-repository/melon_ros2.git robot
+
+# Install world plugin
+./finstall.sh https://github.com/username/world-environment.git world
 ```
 
 **Features:**
-1. Automatic creation of `plugin/robot/` directory
+1. Automatic creation of `plugin/robot/` or `plugin/world/` directory based on choice
 2. Clones the specified GitHub repository
 3. Automatically executes the `install.sh` script within the repository
+4. Supports both robot and world plugin installations
+
+**Installation Types:**
+- **robot** (default): Installs in `plugin/robot/` directory, mounted to `/robot` in container
+- **world**: Installs in `plugin/world/` directory, mounted to `/world` in container
 
 **Notes:**
-- Installed robots/plugins are mounted to `/robot` inside the Docker container
-- Existing directories are automatically removed
+- If no second parameter is provided, defaults to `robot` installation
+- Existing directories are automatically removed before installation
 - A warning message is displayed if `install.sh` is not found
+- Handles permission issues gracefully with fallback to temporary installation
 
 ### Container Management
 
@@ -163,8 +174,9 @@ isaac_factory/
 │   ├── data/                    # Simulation data
 │   ├── documents/               # Documents
 │   └── config/                  # Configuration files
-├── plugin/                      # Plugin/robot directory
-│   └── robot/                   # Robot plugins (mounted to /robot in container)
+├── plugin/                      # Plugin directory
+│   ├── robot/                   # Robot plugins (mounted to /robot in container)
+│   └── world/                   # World plugins (mounted to /world in container)
 ```
 
 ## License

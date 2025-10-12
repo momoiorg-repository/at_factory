@@ -1,6 +1,6 @@
-# Merged Dockerfile: Isaac Sim 4.5.0 + ROS 2 Humble workspace
+# Merged Dockerfile: Isaac Sim 5.0.0 + ROS 2 Humble workspace
 
-# Base image: Isaac Sim 4.5.0 official container
+# Base image: Isaac Sim 5.0.0 official container
 FROM nvcr.io/nvidia/isaac-sim:5.0.0
 
 # Use bash as default shell

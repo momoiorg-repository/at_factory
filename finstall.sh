@@ -2,14 +2,12 @@
 
 # finstall.sh - Automated plugin/robot installation script
 # Usage: ./finstall.sh <github_repo_url>
-# Example: ./finstall.sh https://github.com/SSatoya/melon_ros2.git
 
 set -e  # Exit on any error
 
 # Function to display usage
 usage() {
     echo "Usage: $0 <github_repo_url>"
-    echo "Example: $0 https://github.com/SSatoya/melon_ros2.git"
     exit 1
 }
 

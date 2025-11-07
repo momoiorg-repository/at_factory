@@ -1,0 +1,332 @@
+Here is the `index.html` file adapted for your `at_factory` project.
+
+I have replaced all the content from the "Nerfies" project with clear placeholders (like `[Your Project Title]`, `[Your Author]`, `[path/to/your/video.mp4]`, etc.).
+
+You just need to go through this file and replace the placeholders with your own content.
+
+**Crucial things to change:**
+
+1.  **Google Analytics**: Remove or replace the `gtag('config', 'G-PYVRSFMDRL');` script in the `<head>` section.
+2.  **Title/Metadata**: Update the `<title>`, `<meta name="description">`, and `<meta name="keywords">`.
+3.  **Authors & Links**: Update the hero section with your project title, authors, affiliations, and links to your paper, video, and code (your `at_factory` GitHub repo).
+4.  **Media**: Replace all video and image paths (`./static/videos/...` and `./static/images/...`) with paths to your own project's media.
+5.  **Text**: Replace the Abstract, main text sections, and the BibTeX citation.
+6.  **Footer**: The original author requests that you link back to their site. I have left the footer intact as requested by the original license.
+
+Here is the template:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="[Your project description for at_factory]">
+  <meta name="keywords" content="at_factory, [Your Keyword 1], [Your Keyword 2]">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>at_factory: [Your Project Title]</title>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="[Your personal website URL]">
+      <span class="icon">
+          <i class="fas fa-home"></i>
+      </span>
+      </a>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More Research
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="[Link to your other project]">
+            [Your Other Project]
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">at_factory: [Your Project Title]</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="[Link to author 1's page]">[Your Name 1]</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="[Link to author 2's page]">[Your Name 2]</a><sup>2</sup>,</span>
+            <span class="author-block">
+              [Your Name 3]<sup>1,2</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>[Your Affiliation 1],</span>
+            <span class="author-block"><sup>2</sup>[Your Affiliation 2]</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="[path/to/your/paper.pdf]"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="[Link to your arXiv page]"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="[Link to your YouTube video]"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://github.com/momoiorg-repository/at_factory"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+              <span class="link-block">
+                <a href="[Link to your data]"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="far fa-images"></i>
+                  </span>
+                  <span>Data</span>
+                  </a>
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <video id="teaser" autoplay muted loop playsinline height="100%">
+        <source src="[path/to/your/teaser.mp4]"
+                type="video/mp4">
+      </video>
+      <h2 class="subtitle has-text-centered">
+        A brief, one-sentence description of your project.
+      </h2>
+    </div>
+  </div>
+</section>
+
+<section class="hero is-light is-small">
+  <div class="hero-body">
+    <div class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+        <div class="item">
+          <video poster="" autoplay controls muted loop playsinline height="100%">
+            <source src="[path/to/your/result1.mp4]"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item">
+          <video poster="" autoplay controls muted loop playsinline height="100%">
+            <source src="[path/to/your/result2.mp4]"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item">
+          <video poster="" autoplay controls muted loop playsinline height="100%">
+            <source src="[path/to/your/result3.mp4]"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item">
+          <video poster="" autoplay controls muted loop playsinline height="100%">
+            <source src="[path/to/your/result4.mp4]"
+                    type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            This is where your abstract goes. Lorem ipsum dolor sit amet, consectetur adipiscing
+            elit. Integer vitae Gisl in Gisl, aliquet
+            condimentum.
+          </p>
+          <p>
+            Pellentesque commodo, Gisl eu Gisl Gisl, ut Gisl Gisl Gisl. Gisl Gisl
+            Gisl Gisl Gisl.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Video</h2>
+        <div class="publication-video">
+          <iframe src="https://www.youtube.com/embed/[Your_Video_ID]?rel=0&amp;showinfo=0"
+                  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+    </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+
+    <div class="columns is-centered">
+      <div class="column">
+        <div class="content">
+          <h2 class="title is-3">[Your Section Title 1]</h2>
+          <p>
+            [Your text for this section goes here.]
+          </p>
+          <img src="[path/to/your/image1.jpg]" alt="[A description of your image]"/>
+          <p class="has-text-centered">[Your caption for this image]</p>
+        </div>
+      </div>
+
+      <div class="column">
+        <h2 class="title is-3">[Your Section Title 2]</h2>
+        <div class="columns is-centered">
+          <div class="column content">
+            <p>
+              [Your text for this section goes here.]
+            </p>
+            <video autoplay controls muted loop playsinline height="100%">
+              <source src="[path/to/your/video_section.mp4]"
+                      type="video/mp4">
+            </video>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@misc{[YourCitationKey],
+  author    = {[Your Author List]},
+  title     = {at_factory: [Your Project Title]},
+  year      = {[Year]},
+  publisher = {GitHub},
+  journal   = {GitHub repository},
+  howpublished = {\url{https://github.com/momoiorg-repository/at_factory}},
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link"
+         href="[path/to/your/paper.pdf]">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/momoiorg-repository" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            This website template was borrowed from the source code of the <a
+              href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> project page.
+            We just ask that you link back to this page in the footer.
+            Please remember to remove the analytics code included in the header of the website which
+            you do not want on your website.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
+```

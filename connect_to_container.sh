@@ -3,7 +3,7 @@
 #
 # このスクリプトは、実行中のIsaac Simコンテナに接続するためのスクリプトです。
 
-CONTAINER_NAME="isaac-sim-ws"
+CONTAINER_NAME="at-factory-jazzy"
 
 # コンテナが存在するかチェック
 if ! docker ps -a --format "table {{.Names}}" | grep -q "^${CONTAINER_NAME}$"; then

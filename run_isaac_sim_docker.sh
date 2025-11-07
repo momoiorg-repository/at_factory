@@ -1,33 +1,17 @@
 #!/bin/bash
-# start_isaac_sim_background.sh
+# run_isaac_sim_docker.sh
 #
-# このスクリプトは、Isaac Sim コンテナをバックグラウンドで実行し続けるためのスクリプトです。
+# このスクリプトは、Isaac Sim (Jazzy) コンテナをバックグラウンドで実行し続けるためのスクリプトです。
 # エディタを閉じてもコンテナは停止しません。
+
+# --- Config ---
+# コンテナ名とイメージタグを設定
+CONTAINER_NAME="at-factory-jazzy"
+IMAGE_TAG="at_factory:jazzy"
+# ---
 
 # サーバのローカルXサーバーへのアクセスを許可
 xhost +
-
-# Set GUI performance environment variables
-export QT_X11_NO_MITSHM=1
-export QT_GRAPHICSSYSTEM=native
-export QT_QPA_PLATFORM=xcb
-export QT_AUTO_SCREEN_SCALE_FACTOR=1
-export QT_SCALE_FACTOR=1
-export QT_FONT_DPI=96
-
-# OpenGL performance settings
-export LIBGL_ALWAYS_SOFTWARE=0
-export MESA_GL_VERSION_OVERRIDE=4.5
-export MESA_GLSL_VERSION_OVERRIDE=450
-export __GL_SYNC_TO_VBLANK=0
-export __GL_THREADED_OPTIMIZATIONS=1
-
-# ROS 2 performance settings
-export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-export ROS_DOMAIN_ID=31
-
-# コンテナ名の設定
-CONTAINER_NAME="isaac-sim-ws"
 
 # 既存のコンテナが存在するかチェック
 if docker ps -a --format "table {{.Names}}" | grep -q "^${CONTAINER_NAME}$"; then
@@ -39,14 +23,17 @@ if docker ps -a --format "table {{.Names}}" | grep -q "^${CONTAINER_NAME}$"; the
         echo "コンテナに接続するには: ./connect_to_container.sh"
         exit 0
     else
-        echo "停止中のコンテナを開始します..."
+        echo "停止中のコンテナ ${CONTAINER_NAME} を開始します..."
         docker start ${CONTAINER_NAME}
         echo "コンテナが開始されました。"
         echo "コンテナに接続するには: ./connect_to_container.sh"
         exit 0
     fi
 fi
-echo "Isaac Sim コンテナをバックグラウンドで開始しています..."
+
+echo "Isaac Sim (Jazzy) コンテナをバックグラウンドで開始しています..."
+echo "イメージ: $IMAGE_TAG"
+echo "コンテナ名: $CONTAINER_NAME"
 
 # バックグラウンドでコンテナを実行（-d オプションでデタッチモード）
 docker run --name ${CONTAINER_NAME} -d \
@@ -80,15 +67,13 @@ docker run --name ${CONTAINER_NAME} -d \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
   -v $HOME/.Xauthority:/root/.Xauthority:ro \
   -v ~/Documents:/root/Documents:rw \
-  -v ./plugin/robot:/robot:rw \
-  -v ./plugin/world:/world:rw \
   --entrypoint /bin/bash \
-  isaac_factory:latest \
+  "$IMAGE_TAG" \
   -c "tail -f /dev/null"
 
 # コンテナの起動を確認
 if [ $? -eq 0 ]; then
-    echo "✅ Isaac Sim コンテナがバックグラウンドで開始されました。"
+    echo "✅ Isaac Sim (Jazzy) コンテナがバックグラウンドで開始されました。"
     echo "📋 コンテナ名: ${CONTAINER_NAME}"
     echo ""
     echo "🔗 コンテナに接続するには:"
@@ -103,4 +88,3 @@ else
     echo "❌ コンテナの起動に失敗しました。"
     exit 1
 fi
-

@@ -3,7 +3,7 @@
 #
 # このスクリプトは、Isaac Simコンテナを停止し、完全に初期化するためのスクリプトです。
 
-CONTAINER_NAME="isaac-sim-ws"
+CONTAINER_NAME="at-factory-jazzy"
 
 # コンテナが存在するかチェック
 if ! docker ps -a --format "table {{.Names}}" | grep -q "^${CONTAINER_NAME}$"; then

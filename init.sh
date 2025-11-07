@@ -53,7 +53,7 @@ build_docker_image() {
     # Build without memory limits (apt install is less intensive)
     docker build -t "$IMAGE_TAG" .
     
-    if docker images | grep -q "$IMAGE_TAG"; then
+    if [ -n "$(docker images -q "$IMAGE_TAG")" ]; then
         echo "[INFO] Docker image build complete: $IMAGE_TAG"
     else
         echo "[ERROR] Docker image build failed."
@@ -91,7 +91,8 @@ show_usage() {
     echo "   ./connect_to_container.sh"
     echo ""
     echo "4. Inside the container, run Isaac Sim:"
-    echo "   runapp"
+    echo "   cd /isaac-sim"
+    echo "   ./isaac-sim.sh"
     echo ""
     echo "5. Or run ROS 2 commands:"
     echo "   ros2 topic list"

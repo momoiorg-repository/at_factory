@@ -110,8 +110,7 @@ cd /isaac-sim
 ```bash
 # Start headless server inside container
 cd /isaac-sim
-./isaac-sim.sh --headless
-
+./runheadless.sh
 # Connect client in another terminal
 # Use Omniverse Streaming Client
 ```

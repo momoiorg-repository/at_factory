@@ -46,72 +46,124 @@ git clone https://github.com/momoiorg-repository/plugsim.git
 cd plugsim
 ```
 
-### 2. Clone plugin assets
+### 2. Install the CLI
 
-Plugin `assets/` directories are separate git repositories. Clone them into the correct locations:
+Using [uv](https://docs.astral.sh/uv/) (recommended):
+
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install -e .
+```
+
+Or with plain pip:
+
+```bash
+pip install -e .
+```
+
+This installs the `plugsim` command. Runtime dependency: `pyyaml` only.
+
+### 3. Build the Docker images
+
+```bash
+plugsim setup
+```
+
+This builds two images and creates Isaac Sim cache directories:
+
+| Image | Based on | Purpose |
+|-------|----------|---------|
+| `plugsim:isaac` | Isaac Lab 2.3.0 (Ubuntu 24.04) | Runs Isaac Sim + ROS 2 bridge |
+| `plugsim:ros2` | Ubuntu 24.04 | Runs robot launch files, builds colcon workspaces |
+
+{: .note }
+> First build takes 10–20 minutes. You will be prompted before rebuilding if an image already exists.
+
+### 4. Clone plugin assets
+
+Plugin `assets/` directories contain large USD files stored in separate repositories:
 
 ```bash
 git clone https://github.com/momoiorg-repository/factory_world1.git \
     plugin/example_factory_world/assets
 
 git clone https://github.com/momoiorg-repository/melon_ros2.git \
-    plugin/example_melon_ros2/assets
+    plugin/example_melon_ros2
 ```
-
-{: .note }
-> The `assets/` directories contain large USD files and are not bundled in this repository.
-
-### 3. Install the PlugSim CLI
-
-```bash
-pip install -e .
-```
-
-This installs the `plugsim` command on your host system. It has a single runtime dependency: `pyyaml`.
-
-### 4. Run setup
-
-```bash
-plugsim setup
-```
-
-This command:
-1. Creates `isaac-sim/` persistent cache and data directories
-2. Checks that `Dockerfile` is present
-3. Builds the Docker image `plugsim:jazzy` (~10–20 min on first run)
-4. Sets permissions on `run_tests.sh`
-
-{: .tip }
-> If the image already exists you will be asked whether to rebuild. Press `N` to skip.
 
 ### 5. Set your display
 
-PlugSim uses X11 forwarding for GUI output:
+PlugSim uses X11 forwarding for Isaac Sim GUI output:
 
 ```bash
 export DISPLAY=<your-local-ip>:0
-# e.g.: export DISPLAY=192.168.1.10:0
+xhost +local:docker
 ```
 
 ---
 
-## First run
+## First Run
+
+### Validate your setup
 
 ```bash
-plugsim up                           # start container in background
-plugsim exec example_factory_world  # run the factory world plugin
+plugsim scan                                              # list discovered plugins
+plugsim validate --scenario scenarios/factory_melon.yaml  # check before launching
 ```
 
-Verify everything is working:
+### Start a scenario
 
 ```bash
-plugsim scan      # list discovered plugins
-plugsim validate  # check compatibility
-docker ps         # confirm container is running
+plugsim up --scenario scenarios/factory_melon.yaml
 ```
 
-To open a shell inside the container:
+This starts both containers:
+- `plugsim-isaac` — Isaac Sim container (GPU)
+- `plugsim-ros2` — ROS 2 control container (CPU)
+
+After startup, PlugSim prints the commands to run in each container.
+
+### Connect to the Isaac container
 
 ```bash
 plugsim shell
 ```
+
+From inside:
+
+```bash
+cd /plugin/example_factory_world && python app.py
+```
+
+### Connect to the ROS 2 container
+
+```bash
+plugsim shell ros2
+```
+
+From inside:
+
+```bash
+ros2 launch /plugin/example_melon_ros2/melon_ws/src/melon_bringup/launch/melon_bringup.launch.py
+```
+
+### Stop everything
+
+```bash
+plugsim down
+```
+
+Isaac Sim cache data in `./isaac-sim/` is preserved and reused on the next `plugsim up`.
+
+---
+
+## Adding Your First Plugin
+
+```bash
+plugsim init
+```
+
+Follow the prompts to scaffold a new `environment`, `robot`, or `asset` plugin. Then edit the generated `METADATA.yaml` and drop in your USD or launch files.
+
+See [Plugin System]({% link plugin-system/index.md %}) for the full METADATA.yaml reference.

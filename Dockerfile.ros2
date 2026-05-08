@@ -1,0 +1,59 @@
+# PlugSim ROS2 container — parameterized by ROS distro
+# jazzy  → Ubuntu 24.04 (noble)
+# humble → Ubuntu 22.04 (jammy)
+ARG UBUNTU_VERSION=24.04
+FROM ubuntu:${UBUNTU_VERSION}
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive
+ARG ROS_DISTRO=jazzy
+ENV ROS_DISTRO=${ROS_DISTRO}
+
+# 1. Locale
+RUN apt-get update && apt-get install -y locales \
+    && locale-gen en_US en_US.UTF-8 \
+    && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2. Universe repo
+RUN apt-get update && apt-get install -y software-properties-common \
+    && add-apt-repository universe \
+    && rm -rf /var/lib/apt/lists/*
+
+# 3. ROS2 apt key + repo
+RUN apt-get update && apt-get install -y curl gnupg lsb-release \
+    && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+         -o /usr/share/keyrings/ros-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
+         http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" \
+         | tee /etc/apt/sources.list.d/ros2.list > /dev/null \
+    && rm -rf /var/lib/apt/lists/*
+
+# 4. ROS2 Jazzy + colcon + C++ build tools (needed for drivers like fanuc_driver)
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y \
+        ros-dev-tools \
+        ros-${ROS_DISTRO}-desktop \
+        ros-${ROS_DISTRO}-ros2-control \
+        ros-${ROS_DISTRO}-ros2-controllers \
+        ros-${ROS_DISTRO}-moveit \
+        ros-${ROS_DISTRO}-navigation2 \
+        ros-${ROS_DISTRO}-nav2-bringup \
+        python3-colcon-common-extensions \
+        python3-rosdep \
+        build-essential \
+        cmake \
+        git \
+        git-lfs \
+    && rm -rf /var/lib/apt/lists/*
+
+# 5. rosdep
+RUN rosdep init && rosdep update
+
+# 6. Source ROS2 in bashrc
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc \
+    && echo "export XDG_RUNTIME_DIR=/tmp/runtime-root" >> ~/.bashrc \
+    && echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" >> ~/.bashrc \
+    && echo "export ROS_DOMAIN_ID=31" >> ~/.bashrc
+
+CMD ["/bin/bash"]

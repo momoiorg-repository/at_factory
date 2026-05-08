@@ -1,8 +1,8 @@
 # PlugSim
 
-**PlugSim** is a METADATA.yaml-driven plugin orchestration platform for NVIDIA Isaac Sim + ROS 2 robotics simulation.
+**The fastest way to get a custom robot running in Isaac Sim with a full ROS 2 interface.**
 
-Drop a plugin folder into `plugin/`, add a `METADATA.yaml`, and PlugSim handles discovery, compatibility checking, and container lifecycle — all from a single CLI.
+Drop a robot or environment into `plugin/`, write a `METADATA.yaml`, pick a scenario, and PlugSim handles the containers — all the Docker flags, cache directories, GPU pass-through, and ROS 2 DDS setup that would otherwise take days to figure out.
 
 ---
 
@@ -28,16 +28,40 @@ Drop a plugin folder into `plugin/`, add a `METADATA.yaml`, and PlugSim handles 
 
 ## Quick Start
 
-### 1. Clone the repository
+### 1. Clone and install
+
+Using [uv](https://docs.astral.sh/uv/) (recommended):
 
 ```bash
 git clone https://github.com/momoiorg-repository/plugsim.git
 cd plugsim
+uv venv
+source .venv/bin/activate
+uv pip install -e .
 ```
 
-### 2. Clone plugin assets (USD files)
+Or with plain pip:
 
-Plugin `assets/` directories are separate git repositories and are not included here. Clone them into the appropriate plugin folders:
+```bash
+git clone https://github.com/momoiorg-repository/plugsim.git
+cd plugsim
+pip install -e .
+```
+
+### 2. Build the images
+
+```bash
+plugsim setup
+```
+
+Builds two Docker images and creates Isaac Sim cache directories:
+
+- **`plugsim:isaac`** — Isaac Lab 2.3.0 + ROS 2 Jazzy (GPU container)
+- **`plugsim:ros2`** — ROS 2 Jazzy + colcon + MoveIt (control container)
+
+First build takes 10–20 minutes.
+
+### 3. Clone plugin assets
 
 ```bash
 git clone https://github.com/momoiorg-repository/factory_world1.git \
@@ -47,179 +71,183 @@ git clone https://github.com/momoiorg-repository/melon_ros2.git \
     plugin/example_melon_ros2
 ```
 
-### 3. Install the PlugSim CLI
-
-```bash
-pip install -e .
-```
-
-### 4. Run setup
-
-`plugsim setup` creates the Isaac Sim cache directories, builds the Docker image (~10–20 min on first run), and sets script permissions.
-
-```bash
-plugsim setup
-```
-
-> You will be prompted before rebuilding if the image already exists.
-
-### 5. Set your display (X11 forwarding)
+### 4. Set your display
 
 ```bash
 export DISPLAY=<your-local-ip>:0
-# e.g.: export DISPLAY=192.168.1.10:0
+xhost +local:docker
 ```
 
-### 6. Start the container and run a plugin
+### 5. Start a scenario
 
 ```bash
-plugsim up
-plugsim exec example_factory_world
+plugsim up --scenario scenarios/factory_melon.yaml
+```
+
+### 6. Connect to each container
+
+```bash
+plugsim shell          # Isaac Sim container → run world + robot spawn
+plugsim shell ros2     # ROS 2 container → run robot launch files
 ```
 
 ---
 
-## PlugSim CLI Reference
+## How It Works
+
+PlugSim runs two containers that communicate over ROS 2 DDS (`--network host`):
+
+```
+┌────────────────────────────┐   FastDDS / ROS 2 topics   ┌────────────────────────────┐
+│  plugsim-isaac  (GPU)      │ ◄─────────────────────────► │  plugsim-ros2  (CPU)       │
+│                            │                             │                            │
+│  Isaac Lab 2.3             │                             │  ROS 2 Jazzy               │
+│  World USD + physics       │                             │  colcon + rosdep           │
+│  Robot USD + bridge        │                             │  MoveIt / Nav2 / drivers   │
+└────────────────────────────┘                             └────────────────────────────┘
+                                         ▲
+                              same ROS_DOMAIN_ID=31
+                              → external controllers connect here
+                              (v_dash_ws, MoveIt, custom VLA)
+```
+
+External control stacks connect to the same ROS 2 network without any PlugSim-specific integration — just ROS 2 topics, services, and actions.
+
+---
+
+## CLI Reference
 
 | Command | Description |
 |---------|-------------|
-| `plugsim setup` | Build the Docker image and initialise Isaac Sim storage dirs |
-| `plugsim scan` | List all discovered plugins with version and compatibility info |
-| `plugsim validate` | Check cross-plugin compatibility (ROS distro, deps) |
-| `plugsim up` | Start the simulation container |
-| `plugsim down` | Stop and remove the container |
-| `plugsim shell` | Open an interactive bash shell inside the running container |
-| `plugsim exec <name> [args]` | Run a plugin's entry point inside the container |
-| `plugsim info <name>` | Show full details for a specific plugin |
-| `plugsim init` | Interactively scaffold a new plugin directory with `METADATA.yaml` |
-
-### Examples
-
-```bash
-# See what plugins are loaded
-plugsim scan
-
-# Check compatibility before launching
-plugsim validate
-
-# Start the container
-plugsim up
-
-# Open a shell inside the container
-plugsim shell
-
-# Run example plugins
-plugsim exec example_factory_world
-plugsim exec example_melon_ros2
-
-# Inspect a specific plugin
-plugsim info example_factory_world
-
-# Scaffold a new plugin
-plugsim init
-```
+| `plugsim setup` | Build both Docker images, create Isaac Sim cache dirs |
+| `plugsim up --scenario <file>` | Start both containers for a scenario |
+| `plugsim up --world <name> --robot <name>` | Quick single-robot shorthand |
+| `plugsim down` | Stop and remove both containers |
+| `plugsim shell` | Shell into the Isaac container |
+| `plugsim shell ros2` | Shell into the ROS 2 container |
+| `plugsim scan` | List all discovered plugins |
+| `plugsim validate --scenario <file>` | Check scenario + plugin compatibility |
+| `plugsim info <name>` | Show plugin details and ROS 2 interface |
+| `plugsim init` | Scaffold a new plugin interactively |
 
 ---
 
 ## Plugin System
 
+A plugin is any folder under `plugin/` that contains a `METADATA.yaml`.
+
+### Plugin types
+
+| Type | Purpose | Runs where |
+|------|---------|------------|
+| `environment` | Isaac Sim scene — USD + physics setup | Isaac container |
+| `robot` | Robot model + ROS 2 control driver | Both containers |
+| `asset` | Passive USD objects (furniture, objects) | Isaac container |
+
+### METADATA.yaml (v2.0)
+
+```yaml
+schema_version: "2.0"
+plugin_type: robot
+name: my_robot
+version: 1.0.0
+description: "My robot with ROS 2 control"
+
+compatibility:
+  isaac_lab: ">=2.0.0"
+  ros_distro: jazzy
+
+# What runs in the Isaac container
+isaac_entry:
+  usd: assets/my_robot.usd
+  app: scripts/spawn.py
+
+# What runs in the ROS 2 container
+ros2_entry:
+  workspace: .                        # colcon workspace to build (optional)
+  launch: launch/my_robot.launch.py
+  launch_args:
+    use_sim_time: "true"
+
+# ROS 2 interface contract — topics this robot exposes
+ros2_interface:
+  namespace: /robot
+  publishes:
+    - topic: joint_states
+      type: sensor_msgs/JointState
+  subscribes:
+    - topic: joint_commands
+      type: trajectory_msgs/JointTrajectory
+  action_servers:
+    - name: follow_joint_trajectory
+      type: control_msgs/FollowJointTrajectory
+
+dep_plugins: []
+author: ""
+license: MIT
+repository: ""
+```
+
 ### Directory layout
 
 ```
 plugin/
-├── example_factory_world/
-│   ├── METADATA.yaml     ← required
+├── example_factory_world/    # environment plugin
+│   ├── METADATA.yaml
 │   ├── app.py
+│   └── assets/               # USD files (separate git repo)
+├── example_melon_ros2/       # robot plugin
+│   ├── METADATA.yaml
+│   ├── melon_ws/             # ROS 2 workspace
 │   └── assets/
-└── example_melon_ros2/
-    ├── METADATA.yaml     ← required
-    └── assets/
+└── fanuc_driver/             # robot plugin — FANUC CRX ros2_control driver
+    ├── METADATA.yaml
+    ├── fanuc_hardware_interface/
+    ├── fanuc_moveit_config/
+    └── ...
 ```
 
-All plugins live directly under `plugin/`. There are no `robot/` or `world/` subdirectories — the plugin type is declared inside `METADATA.yaml`.
+---
 
-Supported plugin types: `world`, `robot`, `logic`, `app`
+## Scenarios
 
-### METADATA.yaml schema
+A scenario composes one world + one or more robots with spawn poses and ROS 2 namespaces.
 
 ```yaml
-schema_version: "1.0"
-plugin_type: world          # world | robot | logic | app
-name: my_plugin
-version: 1.0.0
-description: "Short description"
+# scenarios/factory_dual_fanuc.yaml
+name: factory_dual_fanuc
+description: "Two FANUC CRX arms in factory"
 
-compatibility:
-  isaac_sim: ">=5.0.0"
-  ros_distro: jazzy
+world: example_factory_world
 
-entry_point:
-  usd: assets/scene.usd                  # USD scene file (relative to METADATA.yaml)
-  app: app.py                            # Isaac Sim standalone Python script
-  launch: launch/my_plugin.launch.py    # ROS 2 launch file
-  config: config/params.yaml            # optional parameter file
+robots:
+  - plugin: fanuc_crx10ia
+    instance: fanuc1
+    namespace: /fanuc1
+    spawn: { x: 0.5, y: 0.0, z: 0.85 }
 
-dep_plugins: []     # other PlugSim plugin names required
-
-author: "Your Name"
-license: MIT
-repository: "https://github.com/..."
+  - plugin: fanuc_crx10ia
+    instance: fanuc2
+    namespace: /fanuc2
+    spawn: { x: -0.5, y: 0.0, z: 0.85, yaw: 3.14159 }
 ```
 
-**Entry point precedence:** `app` is executed with `python`; `launch` is executed with `ros2 launch`. Only one is used per `plugsim exec` call.
-
-### Adding a plugin
-
-**Option A — manually:**
-1. Create `plugin/<name>/METADATA.yaml`
-2. Run `plugsim scan` to verify it is detected
-
-**Option B — scaffold:**
 ```bash
-plugsim init
-# follow the prompts
+plugsim validate --scenario scenarios/factory_dual_fanuc.yaml
+plugsim up --scenario scenarios/factory_dual_fanuc.yaml
 ```
 
 ---
 
-## Container Management
+## Connecting External Controllers
+
+Because both containers use `--network host` with `ROS_DOMAIN_ID=31`, any ROS 2 node on the host connects automatically:
 
 ```bash
-plugsim up       # start container
-plugsim shell    # open interactive bash shell
-plugsim down     # stop and remove container
-
-docker ps        # check container status
+# From v_dash_ws or any other control container
+ROS_DOMAIN_ID=31 ros2 topic list
+ROS_DOMAIN_ID=31 ros2 topic echo /fanuc1/joint_states
 ```
-
-The container is named **`plugsim-jazzy`** and uses image **`plugsim:jazzy`**.
-
-All plugins are mounted read-write at `/plugin` inside the container.
-
----
-
-## Running Isaac Sim inside the container
-
-```bash
-# Connect first
-plugsim shell
-
-# GUI mode
-cd /isaac-sim && ./isaac-sim.sh
-
-# Headless / livestream mode
-cd /isaac-sim && ./runheadless.sh
-```
-
----
-
-## Running tests
-
-```bash
-bash run_tests.sh -v
-```
-
-Tests cover the core orchestration modules (`scanner`, `parser`). ROS 2 pytest plugins are automatically excluded to avoid Python 3.13 conflicts.
 
 ---
 
@@ -227,26 +255,32 @@ Tests cover the core orchestration modules (`scanner`, `parser`). ROS 2 pytest p
 
 ```
 plugsim/
-├── plugsim/                      # Orchestration library (pip package)
-│   ├── __init__.py
-│   ├── schema.py                 # METADATA.yaml dataclasses
-│   ├── scanner.py                # Plugin discovery
-│   ├── parser.py                 # YAML parsing + compatibility checks
-│   ├── launcher.py               # Container lifecycle (up/down/exec/setup)
-│   └── cli.py                    # CLI entry point
-├── plugin/                       # Plugins directory
-│   ├── example_factory_world/    # Factory environment example
-│   │   ├── METADATA.yaml
-│   │   ├── app.py
-│   │   └── assets/
-│   └── example_melon_ros2/       # Melon robot ROS 2 example
-│       ├── METADATA.yaml
-│       └── assets/
-├── tests/                        # Unit tests
-├── IsaacSim-ros_workspaces/      # ROS 2 workspaces (Jazzy)
-├── Dockerfile                    # Isaac Lab 2.3.0 + ROS 2 Jazzy image
-├── pyproject.toml                # Package definition + CLI entry point
-└── run_tests.sh                  # Test runner
+├── plugsim/                 # Python package (pip install -e .)
+│   ├── schema.py            # Plugin + scenario dataclasses
+│   ├── scanner.py           # Plugin discovery
+│   ├── parser.py            # METADATA.yaml parser (v1.0 + v2.0)
+│   ├── scenario.py          # Scenario file parser + validator
+│   ├── launcher.py          # Two-container lifecycle
+│   └── cli.py               # CLI entry point
+├── plugin/                  # Drop plugins here
+│   ├── example_factory_world/
+│   ├── example_melon_ros2/
+│   └── fanuc_driver/
+├── scenarios/               # Scenario composition files
+│   ├── factory_melon.yaml
+│   └── factory_fanuc.yaml
+├── tests/                   # Unit tests (pytest)
+├── Dockerfile               # plugsim:isaac image (Isaac Lab 2.3 + ROS 2 Jazzy)
+├── Dockerfile.ros2          # plugsim:ros2 image (ROS 2 Jazzy + colcon)
+└── pyproject.toml
+```
+
+---
+
+## Running Tests
+
+```bash
+pytest tests/ -v
 ```
 
 ---

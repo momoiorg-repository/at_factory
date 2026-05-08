@@ -14,6 +14,11 @@ plugin/world/
 # Plugin directories that are separate git repos (cloned independently)
 plugin/example_melon_ros2/
 plugin/example_factory_world/assets/
+plugin/fanuc_driver/
+plugin/assets/
+
+# NvStreamer livestream recordings
+*.etli
 
 # Isaac Sim キャッシュとログファイル
 isaac-sim/cache/

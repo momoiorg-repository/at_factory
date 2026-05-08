@@ -16,120 +16,224 @@ nav_order: 1
 
 ---
 
-## Full example
+## Full example (robot plugin)
 
 ```yaml
-schema_version: "1.0"
-plugin_type: world          # world | robot | logic | app
-name: my_plugin
+schema_version: "2.0"
+plugin_type: robot
+name: my_robot
 version: 1.0.0
-description: "Short description shown in plugsim scan"
+description: "My robot with ROS 2 control"
 
 compatibility:
-  isaac_sim: ">=5.0.0"
+  isaac_lab: ">=2.0.0"
   ros_distro: jazzy
 
-entry_point:
-  usd: assets/scene.usd                  # USD scene file
-  app: app.py                            # Isaac Sim standalone Python script
-  launch: launch/my_plugin.launch.py    # ROS 2 launch file (.launch.py)
-  config: config/params.yaml            # optional parameter file
+isaac_entry:
+  usd: assets/my_robot.usd
+  app: scripts/spawn.py
+
+ros2_entry:
+  workspace: .                        # colcon workspace to build (optional)
+  launch: launch/my_robot.launch.py
+  launch_args:
+    use_sim_time: "true"
+    robot_model: crx10ia_l
+  config: config/params.yaml
+
+ros2_interface:
+  namespace: /robot
+  publishes:
+    - topic: joint_states
+      type: sensor_msgs/JointState
+    - topic: camera/rgb/image_raw
+      type: sensor_msgs/Image
+  subscribes:
+    - topic: joint_commands
+      type: trajectory_msgs/JointTrajectory
+  action_servers:
+    - name: follow_joint_trajectory
+      type: control_msgs/FollowJointTrajectory
 
 dep_plugins:
-  - example_factory_world               # other PlugSim plugin names required
+  - my_world
 
 author: "Your Name"
 license: MIT
-repository: "https://github.com/your-org/my_plugin"
+repository: "https://github.com/your-org/my_robot"
 ```
 
 ---
 
-## Field reference
-
-### Top-level fields
+## Top-level fields
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `schema_version` | string | No | Schema version, currently `"1.0"` |
-| `plugin_type` | string | **Yes** | One of `world`, `robot`, `logic`, `app` |
-| `name` | string | **Yes** | Plugin identifier — must be unique across all plugins |
-| `version` | string | No | Semantic version string (defaults to `"0.0.0"`) |
+| `schema_version` | string | No | Schema version — `"2.0"` |
+| `plugin_type` | string | **Yes** | `environment`, `robot`, or `asset` |
+| `name` | string | **Yes** | Unique plugin identifier |
+| `version` | string | No | Semantic version (default `"1.0.0"`) |
 | `description` | string | No | Short human-readable description |
 | `author` | string | No | Author name |
 | `license` | string | No | License identifier (e.g. `MIT`) |
-| `repository` | string | No | URL to the plugin's source repository |
+| `repository` | string | No | Source repository URL |
 
 ---
 
-### `compatibility`
+## Plugin types
 
-Declares runtime requirements. Both fields are optional but recommended.
+| Type | Isaac container | ROS 2 container | Typical use |
+|------|----------------|----------------|-------------|
+| `environment` | USD scene + app | — | Factory floor, warehouse |
+| `robot` | USD model + spawn script | launch files, colcon workspace | Arms, mobile bases |
+| `asset` | Passive USD only | — | Boxes, pallets, people |
+
+---
+
+## `compatibility`
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `isaac_sim` | string | Version constraint, e.g. `">=5.0.0"` |
-| `ros_distro` | string | ROS 2 distro name, e.g. `jazzy` |
+| `isaac_lab` | string | Version constraint, e.g. `">=2.0.0"` |
+| `ros_distro` | string | Must be `jazzy` if declared |
 
 {: .warning }
-> `plugsim validate` requires all plugins to declare the **same** `ros_distro`. Mismatches are reported as errors.
+> `plugsim validate` rejects any plugin declaring a `ros_distro` other than `jazzy`.
 
 ---
 
-### `entry_point`
+## `isaac_entry`
 
-Declares how the plugin is executed. All sub-fields are optional, but at least one of `app` or `launch` is needed for `plugsim exec` to work.
+What runs in the **Isaac container**. All fields are optional.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `usd` | string | Path to USD scene file, relative to `METADATA.yaml` |
-| `app` | string | Path to Isaac Sim standalone Python script, relative to `METADATA.yaml` |
-| `launch` | string | Path to ROS 2 `.launch.py` file, relative to `METADATA.yaml` |
-| `config` | string | Path to a parameter/config file, relative to `METADATA.yaml` |
+| `usd` | string | USD scene or model file, relative to `METADATA.yaml` |
+| `app` | string | Isaac Sim standalone Python script, relative to `METADATA.yaml` |
 
-**Dispatch precedence:** `plugsim exec` prefers `app` over `launch`. If `app` is set, the plugin runs as:
-
-```
-python /plugin/<name>/<app>
+```yaml
+isaac_entry:
+  usd: assets/scene.usd
+  app: scripts/spawn.py
 ```
 
-If only `launch` is set:
-
-```
-ros2 launch /plugin/<name>/<launch>
-```
-
-All paths are relative to the plugin's own directory and are translated to absolute container paths at runtime (`/plugin/<name>/...`).
+For `asset` plugins, only `usd` is needed. For `environment` plugins, `app` handles physics setup and lighting. For `robot` plugins, `app` spawns the robot into the running scene.
 
 ---
 
-### `dep_plugins`
+## `ros2_entry`
 
-List of other PlugSim plugin **names** this plugin depends on.
+What runs in the **ROS 2 container**. All fields are optional.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `workspace` | string | Path to a colcon workspace to build before launch, relative to `METADATA.yaml` |
+| `launch` | string | ROS 2 `.launch.py` file, relative to `METADATA.yaml` |
+| `launch_args` | mapping | Key-value arguments passed to the launch file |
+| `config` | string | Parameter file, relative to `METADATA.yaml` |
+
+```yaml
+ros2_entry:
+  workspace: .
+  launch: fanuc_hardware_interface/launch/fanuc_mock_control.launch.py
+  launch_args:
+    robot_model: crx10ia_l
+    robot_series: crx
+    launch_rviz: "false"
+  config: fanuc_hardware_interface/config/ros2_controllers.yaml
+```
+
+{: .note }
+> `workspace: .` means the plugin directory itself is a colcon workspace. PlugSim uses this to know that `colcon build` must be run inside the ROS 2 container before the launch file will work.
+
+---
+
+## `ros2_interface`
+
+Declares the ROS 2 topics, services, and actions this plugin exposes. Used by `plugsim info` and future tooling to auto-generate connection configs for external controllers.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `namespace` | string | Default ROS 2 namespace for this robot |
+| `publishes` | list | Topics this plugin publishes |
+| `subscribes` | list | Topics this plugin subscribes to |
+| `action_servers` | list | Action servers this plugin provides |
+
+Each `publishes` / `subscribes` entry:
+
+| Sub-field | Description |
+|-----------|-------------|
+| `topic` | Topic name (relative to namespace) |
+| `type` | ROS 2 message type, e.g. `sensor_msgs/JointState` |
+
+Each `action_servers` entry:
+
+| Sub-field | Description |
+|-----------|-------------|
+| `name` | Action name (relative to namespace) |
+| `type` | ROS 2 action type, e.g. `control_msgs/FollowJointTrajectory` |
+
+{: .note }
+> The `namespace` declared here is the default. Scenarios can override it per-instance using the `namespace` field in the robot entry.
+
+---
+
+## `dep_plugins`
+
+List of other plugin **names** this plugin depends on.
 
 ```yaml
 dep_plugins:
   - example_factory_world
 ```
 
-`plugsim validate` checks that every listed name exists among the discovered plugins.
+`plugsim validate --scenario` checks that every listed name is present in the scenario.
 
 ---
 
-## Minimal valid example
+## Backward compatibility (v1.0 → v2.0)
 
-For a plugin that only provides a USD asset with no executable entry point:
+PlugSim's parser accepts v1.0 files transparently:
+
+| v1.0 field | v2.0 equivalent |
+|------------|----------------|
+| `plugin_type: world` | `plugin_type: environment` |
+| `plugin_type: logic` / `app` | `plugin_type: asset` |
+| `entry_point.usd` / `.app` | `isaac_entry.usd` / `.app` |
+| `entry_point.launch` | `ros2_entry.launch` |
+| `dependencies.plugins` | `dep_plugins` |
+| `compatibility.isaac_sim` | (ignored — use `isaac_lab`) |
+
+---
+
+## Minimal examples
+
+**Environment (world-only):**
 
 ```yaml
-plugin_type: world
+plugin_type: environment
 name: my_world
+isaac_entry:
+  usd: assets/scene.usd
 ```
 
-For a plugin that runs an Isaac Sim script:
+**Robot (ROS 2 driver, no Isaac Sim USD yet):**
 
 ```yaml
-plugin_type: app
-name: my_app
-entry_point:
-  app: main.py
+plugin_type: robot
+name: fanuc_crx10ia
+compatibility:
+  ros_distro: jazzy
+ros2_entry:
+  workspace: .
+  launch: fanuc_hardware_interface/launch/fanuc_mock_control.launch.py
+```
+
+**Asset (passive object):**
+
+```yaml
+plugin_type: asset
+name: pallet_stack
+isaac_entry:
+  usd: assets/pallet.usd
 ```

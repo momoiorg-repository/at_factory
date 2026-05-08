@@ -1,5 +1,5 @@
 title: PlugSim
-description: METADATA.yaml-driven plugin orchestrator for NVIDIA Isaac Sim + ROS 2
+description: Plugin-based Isaac Sim + ROS 2 environment manager
 baseurl: "/PlugSim"
 url: "https://momoiorg-repository.github.io"
 repository: momoiorg-repository/plugsim

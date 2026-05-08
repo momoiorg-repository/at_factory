@@ -1,14 +1,17 @@
-schema_version: "1.0"
-plugin_type: world
+schema_version: "2.0"
+plugin_type: environment
 name: example_factory_world
 version: 1.0.0
-description: "金属加工工場環境 — CNC旋盤等を含む実地調査ベースの仮想工場 (PlugSim チュートリアル例)"
+description: "Metal machining factory environment with CNC lathes — survey-based virtual factory (PlugSim tutorial)"
+
 compatibility:
-  isaac_sim: ">=5.0.0"
+  isaac_lab: ">=2.0.0"
   ros_distro: jazzy
-entry_point:
-  usd: assets/factory_base.usd
+
+isaac_entry:
+  usd: assets/at-factory-world/factory_base.usd
   app: app.py
+
 author: "Momoi Open Source Organization"
 license: MIT
 repository: "https://github.com/momoiorg-repository/factory_world1"

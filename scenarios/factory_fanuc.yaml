@@ -1,0 +1,23 @@
+name: factory_fanuc
+description: "Factory environment with two FANUC CRX-10iA/L arms"
+
+world: example_factory_world
+
+robots:
+  - plugin: fanuc_crx10ia
+    instance: fanuc1
+    namespace: /fanuc1
+    spawn:
+      x: 0.5
+      y: 0.0
+      z: 0.85
+      yaw: 0.0
+
+  - plugin: fanuc_crx10ia
+    instance: fanuc2
+    namespace: /fanuc2
+    spawn:
+      x: -0.5
+      y: 0.0
+      z: 0.85
+      yaw: 3.14159
